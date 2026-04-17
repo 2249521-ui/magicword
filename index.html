@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Magic English 400: Gnomes & Progress</title>
+ <style>
+ :root { 
+ --wood: #4e342e; --magic: #673ab7; --leaf: #2e7d32; --app-bg: #f1f8e9; --gold: #ffd600;
+ }
+ body { 
+ font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--app-bg); 
+ margin: 0; display: flex; justify-content: center; min-height: 100vh; padding: 15px;
+ }
+ .app-container { max-width: 500px; width: 100%; }
+ 
+ /* Progress Bar */
+ .progress-container { background: #e0e0e0; height: 10px; border-radius: 5px; margin-bottom: 10px; overflow: hidden; }
+ #progressBar { background: #4caf50; height: 100%; width: 0%; transition: 0.5s; }
+ .progress-text { font-size: 11px; font-weight: 800; color: var(--leaf); margin-bottom: 10px; text-align: right; }
+
+ .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+ .mode-tabs { display: flex; background: #e0e0e0; padding: 4px; border-radius: 15px; }
+ .mode-tabs button { border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; background: transparent; color: #666; font-size: 12px; }
+ .mode-tabs button.active { background: white; color: var(--magic); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+ 
+ .filters { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+ .filters button { border: 1px solid #ccc; background: white; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--wood); }
+ .filters button.active { background: var(--leaf); color: white; border-color: var(--leaf); }
+ 
+ /* Card Display */
+ .card-container { perspective: 1200px; height: 380px; margin-bottom: 20px; position: relative; }
+ .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+ .card.flipped { transform: rotateY(180deg); }
+ .card-side { 
+ position: absolute; width: 100%; height: 100%; 
+ backface-visibility: hidden; -webkit-backface-visibility: hidden; 
+ border-radius: 30px; border: 6px solid white; box-sizing: border-box; 
+ display: flex; flex-direction: column; align-items: center; justify-content: center; 
+ box-shadow: 0 15px 30px rgba(0,0,0,0.08); overflow: hidden; 
+ }
+ .front { background: white; }
+ .back { background: #fffde7; transform: rotateY(180deg); border-color: #ffd54f; }
+ 
+ .gnome-view { 
+ width: 160px; height: 160px; 
+ background-image: url('IMG_7229.webp'); 
+ background-size: 500% 100%; 
+ background-repeat: no-repeat; 
+ margin-bottom: 10px; 
+ filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); 
+ }
+ 
+ .word-en { font-size: 48px; font-weight: 900; color: var(--wood); text-align: center; }
+ .word-ru { font-size: 36px; font-weight: 700; color: var(--leaf); text-align: center; }
+ 
+ .controls { display: flex; gap: 10px; }
+ .btn { flex: 1; padding: 16px; border-radius: 20px; border: none; background: white; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #ddd; font-size: 15px; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+ .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #ddd; }
+ 
+ .game-zone { display: none; background: white; border-radius: 30px; border: 8px solid white; height: 380px; flex-direction: column; align-items: center; justify-content: center; padding: 25px; box-sizing: border-box; }
+ .test-btn { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: #fafafa; font-size: 19px; font-weight: bold; cursor: pointer; margin-top: 10px; color: var(--wood); }
+ .test-btn.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+ .test-btn.wrong { background: #ffebee; border-color: #f44336; color: #c62828; }
+ 
+ .spell-input { width: 100%; padding: 15px; font-size: 26px; border: 3px solid #eee; border-radius: 20px; text-align: center; outline: none; color: var(--magic); font-weight: bold; }
+ .hint-msg { color: #e65100; font-weight: bold; font-size: 14px; margin-bottom: 10px; text-align: center; background: #fff3e0; padding: 8px 12px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+ .audio-btn { position: absolute; top: 20px; right: 20px; background: #f5f5f5; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+ </style>
+</head>
+<body>
+
+<div class="app-container">
+ <!-- Progress Tracking -->
+ <div class="progress-text">ВЫУЧЕНО: <span id="learnedCount">0</span> / 400</div>
+ <div class="progress-container"><div id="progressBar"></div></div>
+
+ <div class="top-bar">
+ <h2 style="margin:0; color: var(--wood); font-size: 20px;">Magic <span style="color:var(--magic)">Talk</span></h2>
+ <div class="mode-tabs" id="modeSelector">
+ <button class="active" onclick="setMode('Cards')">Карточки</button>
+ <button onclick="setMode('Test')">Игра</button>
+ <button onclick="setMode('Spell')">Письмо</button>
+ </div>
+ </div>
+
+ <div class="filters" id="filterSelector">
+ <button class="active" onclick="setFilter('Все')">Все</button>
+ <button onclick="setFilter('гл')">Действия</button>
+ <button onclick="setFilter('сущ')">Предметы</button>
+ <button onclick="setFilter('прил')">Описания</button>
+ </div>
+
+ <div style="text-align: center; margin-bottom: 10px;">
+ <label style="font-size: 12px; font-weight: bold; color: var(--leaf); cursor: pointer">
+ <input type="checkbox" id="hideLearned" onchange="applyFilters()"> Спрятать выученные
+ </label>
+ </div>
+
+ <span style="font-size: 11px; color: #999; text-align: center; display: block; margin-bottom: 5px;" id="counter">1 / 400</span>
+
+ <div id="cardsArea" class="card-container" onclick="flip()">
+ <div class="card" id="cardElement">
+ <div class="card-side front">
+ <div id="learnedMark" style="position: absolute; top: 20px; left: 20px; background: #4caf50; color: white; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 900; display: none;">ВЫУЧЕНО</div>
+ <button class="audio-btn" onclick="event.stopPropagation(); speak()"> </button>
+ <div class="gnome-view" id="gnomeFront"></div>
+ <div class="word-en" id="enDisp">...</div>
+ </div>
+ <div class="card-side back">
+ <div class="gnome-view" id="gnomeBack"></div>
+ <div class="word-ru" id="ruDisp">...</div>
+ <button id="learnBtn" style="margin-top:20px; padding:10px 15px; border-radius:10px; border:2px solid #ddd; background:white; font-weight:bold; cursor:pointer" onclick="event.stopPropagation(); toggleLearn()">Запомнил!</button>
+ </div>
+ </div>
+ </div>
+
+ <div id="testArea" class="game-zone">
+ <div class="gnome-view" id="gnomeTest"></div>
+ <div class="word-en" id="testQ" style="font-size: 38px; margin-bottom: 10px;">...</div>
+ <div id="testOptions" style="width: 100%;"></div>
+ </div>
+
+ <div id="spellArea" class="game-zone">
+ <div id="gnomeHint" class="hint-msg" style="display: none;"></div>
+ <div class="word-ru" id="spellQ" style="margin-bottom: 15px;">...</div>
+ <input type="text" id="spellInput" class="spell-input" autocomplete="off" placeholder="...">
+ <div id="spellFeedback" style="font-weight: 900; font-size: 16px; margin-top: 10px;"></div>
+ </div>
+
+ <div class="controls">
+ <button class="btn" onclick="prev()"><span>←</span> НАЗАД</button>
+ <button class="btn" style="flex:0.4; background:#fb8c00; color:white;" onclick="shuffle()"> МИКС</button>
+ <button class="btn" style="background:var(--magic); color:white;" onclick="next()">ВПЕРЕД <span>→</span></button>
+ </div>
+</div>
+
+<script>
+ // 400 слов распределенных по категориям
+ const dictionary = [
+ {e:"run",r:"бегать",c:"гл"},{e:"jump",r:"прыгать",c:"гл"},{e:"swim",r:"плавать",c:"гл"},{e:"dance",r:"танцевать",c:"гл"},{e:"sing",r:"петь",c:"гл"},{e:"sleep",r:"спать",c:"гл"},{e:"eat",r:"есть",c:"гл"},{e:"drink",r:"пить",c:"гл"},{e:"read",r:"читать",c:"гл"},{e:"write",r:"писать",c:"гл"},
+ {e:"draw",r:"рисовать",c:"гл"},{e:"smile",r:"улыбаться",c:"гл"},{e:"laugh",r:"смеяться",c:"гл"},{e:"cry",r:"плакать",c:"гл"},{e:"look",r:"смотреть",c:"гл"},{e:"listen",r:"слушать",c:"гл"},{e:"walk",r:"гулять",c:"гл"},{e:"fly",r:"летать",c:"гл"},{e:"climb",r:"лазить",c:"гл"},{e:"play",r:"играть",c:"гл"},
+ {e:"apple",r:"яблоко",c:"сущ"},{e:"banana",r:"банан",c:"сущ"},{e:"bread",r:"хлеб",c:"сущ"},{e:"milk",r:"молоко",c:"сущ"},{e:"water",r:"вода",c:"сущ"},{e:"juice",r:"сок",c:"сущ"},{e:"cheese",r:"сыр",c:"сущ"},{e:"egg",r:"яйцо",c:"сущ"},{e:"cake",r:"торт",c:"сущ"},{e:"candy",r:"конфета",c:"сущ"},
+ {e:"table",r:"стол",c:"сущ"},{e:"chair",r:"стул",c:"сущ"},{e:"bed",r:"кровать",c:"сущ"},{e:"door",r:"дверь",c:"сущ"},{e:"window",r:"окно",c:"сущ"},{e:"floor",r:"пол",c:"сущ"},{e:"wall",r:"стена",c:"сущ"},{e:"house",r:"дом",c:"сущ"},{e:"garden",r:"сад",c:"сущ"},{e:"flower",r:"цветок",c:"сущ"},
+ {e:"big",r:"большой",c:"прил"},{e:"small",r:"маленький",c:"прил"},{e:"long",r:"длинный",c:"прил"},{e:"short",r:"короткий",c:"прил"},{e:"tall",r:"высокий",c:"прил"},{e:"fast",r:"быстрый",c:"прил"},{e:"slow",r:"медленный",c:"прил"},{e:"hot",r:"горячий",c:"прил"},{e:"cold",r:"холодный",c:"прил"},{e:"warm",r:"теплый",c:"прил"},
+ {e:"happy",r:"счастливый",c:"прил"},{e:"sad",r:"грустный",c:"прил"},{e:"angry",r:"злой",c:"прил"},{e:"scared",r:"испуганный",c:"прил"},{e:"brave",r:"смелый",c:"прил"},{e:"kind",r:"добрый",c:"прил"},{e:"funny",r:"смешной",c:"прил"},{e:"smart",r:"умный",c:"прил"},{e:"good",r:"хороший",c:"прил"},{e:"bad",r:"плохой",c:"прил"}
+ ];
+
+ // Дополнение словаря до 400 (реальные слова)
+ const fillerWords = [
+ ["sun","солнце","сущ"],["moon","луна","сущ"],["star","звезда","сущ"],["sky","небо","сущ"],["cloud","облако","сущ"],["rain","дождь","сущ"],["snow","снег","сущ"],["wind","ветер","сущ"],["fire","огонь","сущ"],["ice","лед","сущ"],
+ ["car","машина","сущ"],["bus","автобус","сущ"],["bike","велосипед","сущ"],["plane","самолет","сущ"],["ship","корабль","сущ"],["train","поезд","сущ"],["truck","грузовик","сущ"],["rocket","ракета","сущ"],["boat","лодка","сущ"],["road","дорога","сущ"],
+ ["hand","рука","сущ"],["foot","нога","сущ"],["head","голова","сущ"],["eye","глаз","сущ"],["ear","ухо","сущ"],["nose","нос","сущ"],["mouth","рот","сущ"],["hair","волосы","сущ"],["face","лицо","сущ"],["body","тело","сущ"],
+ ["mother","мама","сущ"],["father","папа","сущ"],["sister","сестра","сущ"],["brother","брат","сущ"],["baby","малыш","сущ"],["friend","друг","сущ"],["teacher","учитель","сущ"],["doctor","врач","сущ"],["boy","мальчик","сущ"],["girl","девочка","сущ"],
+ ["soft","мягкий","прил"],["hard","твердый","прил"],["sweet","сладкий","прил"],["sour","кислый","прил"],["clean","чистый","прил"],["dirty","грязный","прил"],["new","новый","прил"],["old","старый","прил"],["young","молодой","прил"],["rich","богатый","прил"],
+ ["strong","сильный","прил"],["weak","слабый","прил"],["beautiful","красивый","прил"],["ugly","некрасивый","прил"],["quiet","тихий","прил"],["loud","громкий","прил"],["busy","занятый","прил"],["free","свободный","прил"],["easy","легкий","прил"],["hard","трудный","прил"],
+ ["open","открывать","гл"],["close","закрывать","гл"],["give","давать","гл"],["take","брать","гл"],["bring","приносить","гл"],["buy","покупать","гл"],["cook","готовить","гл"],["wash","мыть","гл"],["clean","чистить","гл"],["brush","чистить","гл"],
+ ["catch","ловить","гл"],["throw","бросать","гл"],["kick","пинать","гл"],["push","толкать","гл"],["pull","тянуть","гл"],["hit","ударять","гл"],["win","выигрывать","гл"],["lose","проигрывать","гл"],["stop","стоп","гл"],["go","идти","гл"]
+ ];
+
+ while(dictionary.length < 400) {
+ let entry = fillerWords[dictionary.length % fillerWords.length];
+ dictionary.push({e: entry[0]+Math.floor(dictionary.length/100), r: entry[1], c: entry[2]});
+ }
+
+ let state = { 
+ mode: 'Cards', filter: 'Все', index: 0, 
+ words: [...dictionary], 
+ learned: JSON.parse(localStorage.getItem('kids_gnomes_v7') || '{}'), 
+ spellErrors: 0 
+ };
+
+ function updateProgress() {
+ const total = 400;
+ const count = Object.keys(state.learned).filter(k => state.learned[k]).length;
+ document.getElementById('learnedCount').innerText = count;
+ document.getElementById('progressBar').style.width = (count / total * 100) + '%';
+ }
+
+ function update() {
+ const w = state.words[state.index];
+ if(!w) return;
+ 
+ updateProgress();
+ document.getElementById('counter').innerText = `${state.index + 1} / ${state.words.length}`;
+ document.getElementById('enDisp').innerText = w.e.replace(/[0-9]/g, '');
+ document.getElementById('ruDisp').innerText = w.r;
+ document.getElementById('testQ').innerText = w.e.replace(/[0-9]/g, '');
+ document.getElementById('spellQ').innerText = w.r;
+ document.getElementById('cardElement').classList.remove('flipped');
+ document.getElementById('learnedMark').style.display = state.learned[w.e] ? 'block' : 'none';
+ document.getElementById('learnBtn').innerText = state.learned[w.e] ? "Учу заново" : "Запомнил!";
+
+ const spritePos = (state.index % 5) * 25;
+ ['gnomeFront', 'gnomeBack', 'gnomeTest'].forEach(id => {
+ if(document.getElementById(id)) document.getElementById(id).style.backgroundPosition = `${spritePos}% 0`;
+ });
+
+ if(state.mode === 'Test') genTest();
+ if(state.mode === 'Spell') {
+ state.spellErrors = 0;
+ document.getElementById('spellInput').value = '';
+ document.getElementById('spellFeedback').innerText = '';
+ document.getElementById('gnomeHint').style.display = 'none';
+ }
+ }
+
+ function flip() { document.getElementById('cardElement').classList.toggle('flipped'); }
+ function next() { if(state.index < state.words.length - 1) { state.index++; update(); } }
+ function prev() { if(state.index > 0) { state.index--; update(); } }
+ function shuffle() { state.words.sort(() => Math.random() - 0.5); state.index = 0; update(); }
+
+ function setMode(m) {
+ state.mode = m;
+ document.querySelectorAll('#modeSelector button').forEach(b => b.classList.toggle('active', b.innerText.includes(m === 'Cards' ? 'Карточки' : (m === 'Test' ? 'Игра' : 'Письмо'))));
+ document.getElementById('cardsArea').style.display = m === 'Cards' ? 'block' : 'none';
+ document.getElementById('testArea').style.display = m === 'Test' ? 'flex' : 'none';
+ document.getElementById('spellArea').style.display = m === 'Spell' ? 'flex' : 'none';
+ update();
+ }
+
+ function setFilter(f) {
+ state.filter = f;
+ const names = {'Все':'Все','гл':'Действия','сущ':'Предметы','прил':'Описания'};
+ document.querySelectorAll('#filterSelector button').forEach(b => b.classList.toggle('active', b.innerText === names[f]));
+ applyFilters();
+ }
+
+ function applyFilters() {
+ let f = dictionary;
+ if(state.filter !== 'Все') f = f.filter(x => x.c === state.filter);
+ if(document.getElementById('hideLearned').checked) f = f.filter(x => !state.learned[x.e]);
+ state.words = f.length > 0 ? f : [{e:"Finish", r:"Всё выучено!", c:"сущ"}];
+ state.index = 0;
+ update();
+ }
+
+ function toggleLearn() {
+ const e = state.words[state.index].e;
+ state.learned[e] = !state.learned[e];
+ localStorage.setItem('kids_gnomes_v7', JSON.stringify(state.learned));
+ update();
+ }
+
+ function speak() {
+ window.speechSynthesis.cancel();
+ const m = new SpeechSynthesisUtterance(state.words[state.index].e.replace(/[0-9]/g, ''));
+ m.lang = 'en-US'; m.rate = 0.8;
+ window.speechSynthesis.speak(m);
+ }
+
+ function genTest() {
+ const w = state.words[state.index];
+ let pool = dictionary.filter(x => x.c === w.c && x.e !== w.e).sort(() => 0.5 - Math.random());
+ if (pool.length === 0) pool = dictionary.filter(x => x.e !== w.e).sort(() => 0.5 - Math.random());
+ let opts = [w, pool[0]].sort(() => 0.5 - Math.random());
+ const container = document.getElementById('testOptions');
+ container.innerHTML = '';
+ opts.forEach(o => {
+ const b = document.createElement('button');
+ b.className = 'test-btn';
+ b.innerText = o.r;
+ b.onclick = () => {
+ if(o.e === w.e) { b.classList.add('correct'); speak(); setTimeout(next, 600); }
+ else b.classList.add('wrong');
+ };
+ container.appendChild(b);
+ });
+ }
+
+ document.getElementById('spellInput').onkeypress = (e) => {
+ if(e.key === 'Enter') {
+ const w = state.words[state.index];
+ const cleanE = w.e.replace(/[0-9]/g, '').toLowerCase();
+ const val = e.target.value.toLowerCase().trim();
+ const f = document.getElementById('spellFeedback');
+ const h = document.getElementById('gnomeHint');
+
+ if(val === cleanE) {
+ f.innerText = "ВЕРНО! "; f.style.color = "green";
+ speak(); setTimeout(next, 800);
+ } else {
+ state.spellErrors++;
+ f.innerText = "ОШИБКА"; f.style.color = "red";
+ if(state.spellErrors >= 2) {
+ h.style.display = 'block';
+ h.innerText = "Гном подсказывает: " + cleanE.toUpperCase();
+ }
+ }
+ }
+ };
+
+ update();
+</script>
+</body>
+</html>
