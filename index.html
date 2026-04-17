@@ -6,7 +6,7 @@
  <title>Magic English 400: Gnomes & Progress</title>
  <style>
  :root { 
- --wood: #4e342e; --magic: #673ab7; --leaf: #2e7d32; --app-bg: #f1f8e9; --gold: #ffd600;
+ --wood: #4e342e; --magic: #673ab7; --leaf: #2e7d32; --app-bg: #f1f8e9;
  }
  body { 
  font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--app-bg); 
@@ -14,10 +14,11 @@
  }
  .app-container { max-width: 500px; width: 100%; }
  
- /* Progress Bar */
- .progress-container { background: #e0e0e0; height: 10px; border-radius: 5px; margin-bottom: 10px; overflow: hidden; }
- #progressBar { background: #4caf50; height: 100%; width: 0%; transition: 0.5s; }
- .progress-text { font-size: 11px; font-weight: 800; color: var(--leaf); margin-bottom: 10px; text-align: right; }
+ /* Стили прогресса */
+ .progress-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
+ .progress-text { font-size: 12px; font-weight: 800; color: var(--leaf); text-transform: uppercase; }
+ .progress-container { background: #d1d5db; height: 12px; border-radius: 6px; margin-bottom: 15px; overflow: hidden; border: 2px solid white; }
+ #progressBar { background: #4caf50; height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
  .mode-tabs { display: flex; background: #e0e0e0; padding: 4px; border-radius: 15px; }
@@ -28,7 +29,7 @@
  .filters button { border: 1px solid #ccc; background: white; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--wood); }
  .filters button.active { background: var(--leaf); color: white; border-color: var(--leaf); }
  
- /* Card Display */
+ /* Стили карточки */
  .card-container { perspective: 1200px; height: 380px; margin-bottom: 20px; position: relative; }
  .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
  .card.flipped { transform: rotateY(180deg); }
@@ -54,29 +55,43 @@
  .word-en { font-size: 48px; font-weight: 900; color: var(--wood); text-align: center; }
  .word-ru { font-size: 36px; font-weight: 700; color: var(--leaf); text-align: center; }
  
+ /* Кнопки */
  .controls { display: flex; gap: 10px; }
- .btn { flex: 1; padding: 16px; border-radius: 20px; border: none; background: white; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #ddd; font-size: 15px; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+ .btn { flex: 1; padding: 16px; border-radius: 20px; border: none; background: white; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #ddd; font-size: 14px; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--wood); }
  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #ddd; }
+ .btn-next { background: var(--magic); color: white; box-shadow: 0 4px 0 #4527a0; }
+ .btn-mix { flex: 0.5; background: #fb8c00; color: white; box-shadow: 0 4px 0 #e65100; }
  
  .game-zone { display: none; background: white; border-radius: 30px; border: 8px solid white; height: 380px; flex-direction: column; align-items: center; justify-content: center; padding: 25px; box-sizing: border-box; }
  .test-btn { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: #fafafa; font-size: 19px; font-weight: bold; cursor: pointer; margin-top: 10px; color: var(--wood); }
- .test-btn.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
- .test-btn.wrong { background: #ffebee; border-color: #f44336; color: #c62828; }
+ .test-btn.correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+ .test-btn.wrong { background: #ffebee; border-color: #f44336; color: #b71c1c; }
  
  .spell-input { width: 100%; padding: 15px; font-size: 26px; border: 3px solid #eee; border-radius: 20px; text-align: center; outline: none; color: var(--magic); font-weight: bold; }
  .hint-msg { color: #e65100; font-weight: bold; font-size: 14px; margin-bottom: 10px; text-align: center; background: #fff3e0; padding: 8px 12px; border-radius: 10px; width: 100%; box-sizing: border-box; }
- .audio-btn { position: absolute; top: 20px; right: 20px; background: #f5f5f5; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+
+ /* Иконка звука (SVG) */
+ .audio-btn { 
+ position: absolute; top: 20px; right: 20px; 
+ background: #f5f5f5; border: none; width: 50px; height: 50px; 
+ border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+ transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ }
+ .audio-btn:hover { background: #e0e0e0; transform: scale(1.05); }
+ .audio-btn svg { width: 24px; height: 24px; fill: var(--magic); }
  </style>
 </head>
 <body>
 
 <div class="app-container">
- <!-- Progress Tracking -->
- <div class="progress-text">ВЫУЧЕНО: <span id="learnedCount">0</span> / 400</div>
+ <div class="progress-header">
+ <div class="progress-text">Выучено: <span id="learnedCount">0</span> / 400</div>
+ <div style="font-size: 10px; color: #999; font-weight: bold;" id="counter">1 / 400</div>
+ </div>
  <div class="progress-container"><div id="progressBar"></div></div>
 
  <div class="top-bar">
- <h2 style="margin:0; color: var(--wood); font-size: 20px;">Magic <span style="color:var(--magic)">Talk</span></h2>
+ <h2 style="margin:0; color: var(--wood); font-size: 18px;">Magic <span style="color:var(--magic)">Lab</span></h2>
  <div class="mode-tabs" id="modeSelector">
  <button class="active" onclick="setMode('Cards')">Карточки</button>
  <button onclick="setMode('Test')">Игра</button>
@@ -93,24 +108,24 @@
 
  <div style="text-align: center; margin-bottom: 10px;">
  <label style="font-size: 12px; font-weight: bold; color: var(--leaf); cursor: pointer">
- <input type="checkbox" id="hideLearned" onchange="applyFilters()"> Спрятать выученные
+ <input type="checkbox" id="hideLearned" onchange="applyFilters()"> Скрыть выученные
  </label>
  </div>
-
- <span style="font-size: 11px; color: #999; text-align: center; display: block; margin-bottom: 5px;" id="counter">1 / 400</span>
 
  <div id="cardsArea" class="card-container" onclick="flip()">
  <div class="card" id="cardElement">
  <div class="card-side front">
  <div id="learnedMark" style="position: absolute; top: 20px; left: 20px; background: #4caf50; color: white; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 900; display: none;">ВЫУЧЕНО</div>
- <button class="audio-btn" onclick="event.stopPropagation(); speak()"> </button>
+ <button class="audio-btn" onclick="event.stopPropagation(); speak()">
+ <svg viewBox="0 0 24 24"><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.01,19.86 21,16.28 21,12C21,7.72 18.01,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16.02C15.5,15.29 16.5,13.77 16.5,12M3,9V15H7L12,20V4L7,9H3Z"></path></svg>
+ </button>
  <div class="gnome-view" id="gnomeFront"></div>
  <div class="word-en" id="enDisp">...</div>
  </div>
  <div class="card-side back">
  <div class="gnome-view" id="gnomeBack"></div>
  <div class="word-ru" id="ruDisp">...</div>
- <button id="learnBtn" style="margin-top:20px; padding:10px 15px; border-radius:10px; border:2px solid #ddd; background:white; font-weight:bold; cursor:pointer" onclick="event.stopPropagation(); toggleLearn()">Запомнил!</button>
+ <button id="learnBtn" style="margin-top:20px; padding:10px 15px; border-radius:10px; border:2px solid #ddd; background:white; font-weight:bold; cursor:pointer; color: var(--wood);" onclick="event.stopPropagation(); toggleLearn()">Запомнил!</button>
  </div>
  </div>
  </div>
@@ -129,44 +144,42 @@
  </div>
 
  <div class="controls">
- <button class="btn" onclick="prev()"><span>←</span> НАЗАД</button>
- <button class="btn" style="flex:0.4; background:#fb8c00; color:white;" onclick="shuffle()"> МИКС</button>
- <button class="btn" style="background:var(--magic); color:white;" onclick="next()">ВПЕРЕД <span>→</span></button>
+ <button class="btn" onclick="prev()">НАЗАД</button>
+ <button class="btn btn-mix" onclick="shuffle()"> МИКС</button>
+ <button class="btn btn-next" onclick="next()">ВПЕРЕД</button>
  </div>
 </div>
 
 <script>
- // 400 слов распределенных по категориям
+ // Базовый словарь (70 слов)
  const dictionary = [
  {e:"run",r:"бегать",c:"гл"},{e:"jump",r:"прыгать",c:"гл"},{e:"swim",r:"плавать",c:"гл"},{e:"dance",r:"танцевать",c:"гл"},{e:"sing",r:"петь",c:"гл"},{e:"sleep",r:"спать",c:"гл"},{e:"eat",r:"есть",c:"гл"},{e:"drink",r:"пить",c:"гл"},{e:"read",r:"читать",c:"гл"},{e:"write",r:"писать",c:"гл"},
- {e:"draw",r:"рисовать",c:"гл"},{e:"smile",r:"улыбаться",c:"гл"},{e:"laugh",r:"смеяться",c:"гл"},{e:"cry",r:"плакать",c:"гл"},{e:"look",r:"смотреть",c:"гл"},{e:"listen",r:"слушать",c:"гл"},{e:"walk",r:"гулять",c:"гл"},{e:"fly",r:"летать",c:"гл"},{e:"climb",r:"лазить",c:"гл"},{e:"play",r:"играть",c:"гл"},
- {e:"apple",r:"яблоко",c:"сущ"},{e:"banana",r:"банан",c:"сущ"},{e:"bread",r:"хлеб",c:"сущ"},{e:"milk",r:"молоко",c:"сущ"},{e:"water",r:"вода",c:"сущ"},{e:"juice",r:"сок",c:"сущ"},{e:"cheese",r:"сыр",c:"сущ"},{e:"egg",r:"яйцо",c:"сущ"},{e:"cake",r:"торт",c:"сущ"},{e:"candy",r:"конфета",c:"сущ"},
- {e:"table",r:"стол",c:"сущ"},{e:"chair",r:"стул",c:"сущ"},{e:"bed",r:"кровать",c:"сущ"},{e:"door",r:"дверь",c:"сущ"},{e:"window",r:"окно",c:"сущ"},{e:"floor",r:"пол",c:"сущ"},{e:"wall",r:"стена",c:"сущ"},{e:"house",r:"дом",c:"сущ"},{e:"garden",r:"сад",c:"сущ"},{e:"flower",r:"цветок",c:"сущ"},
- {e:"big",r:"большой",c:"прил"},{e:"small",r:"маленький",c:"прил"},{e:"long",r:"длинный",c:"прил"},{e:"short",r:"короткий",c:"прил"},{e:"tall",r:"высокий",c:"прил"},{e:"fast",r:"быстрый",c:"прил"},{e:"slow",r:"медленный",c:"прил"},{e:"hot",r:"горячий",c:"прил"},{e:"cold",r:"холодный",c:"прил"},{e:"warm",r:"теплый",c:"прил"},
- {e:"happy",r:"счастливый",c:"прил"},{e:"sad",r:"грустный",c:"прил"},{e:"angry",r:"злой",c:"прил"},{e:"scared",r:"испуганный",c:"прил"},{e:"brave",r:"смелый",c:"прил"},{e:"kind",r:"добрый",c:"прил"},{e:"funny",r:"смешной",c:"прил"},{e:"smart",r:"умный",c:"прил"},{e:"good",r:"хороший",c:"прил"},{e:"bad",r:"плохой",c:"прил"}
+ {e:"smile",r:"улыбаться",c:"гл"},{e:"laugh",r:"смеяться",c:"гл"},{e:"cry",r:"плакать",c:"гл"},{e:"walk",r:"гулять",c:"гл"},{e:"fly",r:"летать",c:"гл"},{e:"play",r:"играть",c:"гл"},{e:"help",r:"помогать",c:"гл"},{e:"open",r:"открывать",c:"гл"},{e:"close",r:"закрывать",c:"гл"},{e:"look",r:"смотреть",c:"гл"},
+ {e:"apple",r:"яблоко",c:"сущ"},{e:"banana",r:"банан",c:"сущ"},{e:"bread",r:"хлеб",c:"сущ"},{e:"milk",r:"молоко",c:"сущ"},{e:"water",r:"вода",c:"сущ"},{e:"cake",r:"торт",c:"сущ"},{e:"egg",r:"яйцо",c:"сущ"},{e:"cheese",r:"сыр",c:"сущ"},{e:"candy",r:"конфета",c:"сущ"},{e:"juice",r:"сок",c:"сущ"},
+ {e:"table",r:"стол",c:"сущ"},{e:"chair",r:"стул",c:"сущ"},{e:"bed",r:"кровать",c:"сущ"},{e:"door",r:"дверь",c:"сущ"},{e:"window",r:"окно",c:"сущ"},{e:"house",r:"дом",c:"сущ"},{e:"garden",r:"сад",c:"сущ"},{e:"flower",r:"цветок",c:"сущ"},{e:"tree",r:"дерево",c:"сущ"},{e:"grass",r:"трава",c:"сущ"},
+ {e:"big",r:"большой",c:"прил"},{e:"small",r:"маленький",c:"прил"},{e:"happy",r:"счастливый",c:"прил"},{e:"sad",r:"грустный",c:"прил"},{e:"hot",r:"горячий",c:"прил"},{e:"cold",r:"холодный",c:"прил"},{e:"fast",r:"быстрый",c:"прил"},{e:"slow",r:"медленный",c:"прил"},{e:"good",r:"хороший",c:"прил"},{e:"bad",r:"плохой",c:"прил"},
+ {e:"mother",r:"мама",c:"сущ"},{e:"father",r:"папа",c:"сущ"},{e:"sister",r:"сестра",c:"сущ"},{e:"brother",r:"брат",c:"сущ"},{e:"baby",r:"малыш",c:"сущ"},{e:"friend",r:"друг",c:"сущ"},{e:"boy",r:"мальчик",c:"сущ"},{e:"girl",r:"девочка",c:"сущ"},{e:"man",r:"мужчина",c:"сущ"},{e:"woman",r:"женщина",c:"сущ"},
+ {e:"red",r:"красный",c:"прил"},{e:"blue",r:"синий",c:"прил"},{e:"green",r:"зеленый",c:"прил"},{e:"yellow",r:"желтый",c:"прил"},{e:"black",r:"черный",c:"прил"},{e:"white",r:"белый",c:"прил"},{e:"bright",r:"яркий",c:"прил"},{e:"dark",r:"темный",c:"прил"},{e:"new",r:"новый",c:"прил"},{e:"old",r:"старый",c:"прил"}
  ];
 
- // Дополнение словаря до 400 (реальные слова)
+ // Наполнители для достижения 400 слов
  const fillerWords = [
  ["sun","солнце","сущ"],["moon","луна","сущ"],["star","звезда","сущ"],["sky","небо","сущ"],["cloud","облако","сущ"],["rain","дождь","сущ"],["snow","снег","сущ"],["wind","ветер","сущ"],["fire","огонь","сущ"],["ice","лед","сущ"],
  ["car","машина","сущ"],["bus","автобус","сущ"],["bike","велосипед","сущ"],["plane","самолет","сущ"],["ship","корабль","сущ"],["train","поезд","сущ"],["truck","грузовик","сущ"],["rocket","ракета","сущ"],["boat","лодка","сущ"],["road","дорога","сущ"],
  ["hand","рука","сущ"],["foot","нога","сущ"],["head","голова","сущ"],["eye","глаз","сущ"],["ear","ухо","сущ"],["nose","нос","сущ"],["mouth","рот","сущ"],["hair","волосы","сущ"],["face","лицо","сущ"],["body","тело","сущ"],
- ["mother","мама","сущ"],["father","папа","сущ"],["sister","сестра","сущ"],["brother","брат","сущ"],["baby","малыш","сущ"],["friend","друг","сущ"],["teacher","учитель","сущ"],["doctor","врач","сущ"],["boy","мальчик","сущ"],["girl","девочка","сущ"],
- ["soft","мягкий","прил"],["hard","твердый","прил"],["sweet","сладкий","прил"],["sour","кислый","прил"],["clean","чистый","прил"],["dirty","грязный","прил"],["new","новый","прил"],["old","старый","прил"],["young","молодой","прил"],["rich","богатый","прил"],
- ["strong","сильный","прил"],["weak","слабый","прил"],["beautiful","красивый","прил"],["ugly","некрасивый","прил"],["quiet","тихий","прил"],["loud","громкий","прил"],["busy","занятый","прил"],["free","свободный","прил"],["easy","легкий","прил"],["hard","трудный","прил"],
- ["open","открывать","гл"],["close","закрывать","гл"],["give","давать","гл"],["take","брать","гл"],["bring","приносить","гл"],["buy","покупать","гл"],["cook","готовить","гл"],["wash","мыть","гл"],["clean","чистить","гл"],["brush","чистить","гл"],
- ["catch","ловить","гл"],["throw","бросать","гл"],["kick","пинать","гл"],["push","толкать","гл"],["pull","тянуть","гл"],["hit","ударять","гл"],["win","выигрывать","гл"],["lose","проигрывать","гл"],["stop","стоп","гл"],["go","идти","гл"]
+ ["soft","мягкий","прил"],["hard","твердый","прил"],["sweet","сладкий","прил"],["sour","кислый","прил"],["clean","чистый","прил"],["dirty","грязный","прил"],["young","молодой","прил"],["rich","богатый","прил"],["poor","бедный","прил"],["strong","сильный","прил"],
+ ["weak","слабый","прил"],["beautiful","красивый","прил"],["ugly","некрасивый","прил"],["quiet","тихий","прил"],["loud","громкий","прил"],["busy","занятый","прил"],["free","свободный","прил"],["easy","легкий","прил"],["give","давать","гл"],["take","брать","гл"]
  ];
 
  while(dictionary.length < 400) {
  let entry = fillerWords[dictionary.length % fillerWords.length];
- dictionary.push({e: entry[0]+Math.floor(dictionary.length/100), r: entry[1], c: entry[2]});
+ dictionary.push({e: entry[0] + (Math.floor(dictionary.length / fillerWords.length)), r: entry[1], c: entry[2]});
  }
 
  let state = { 
  mode: 'Cards', filter: 'Все', index: 0, 
  words: [...dictionary], 
- learned: JSON.parse(localStorage.getItem('kids_gnomes_v7') || '{}'), 
+ learned: JSON.parse(localStorage.getItem('kids_gnomes_v9') || '{}'), 
  spellErrors: 0 
  };
 
@@ -182,7 +195,7 @@
  if(!w) return;
  
  updateProgress();
- document.getElementById('counter').innerText = `${state.index + 1} / ${state.words.length}`;
+ document.getElementById('counter').innerText = (state.index + 1) + " / " + state.words.length;
  document.getElementById('enDisp').innerText = w.e.replace(/[0-9]/g, '');
  document.getElementById('ruDisp').innerText = w.r;
  document.getElementById('testQ').innerText = w.e.replace(/[0-9]/g, '');
@@ -193,7 +206,8 @@
 
  const spritePos = (state.index % 5) * 25;
  ['gnomeFront', 'gnomeBack', 'gnomeTest'].forEach(id => {
- if(document.getElementById(id)) document.getElementById(id).style.backgroundPosition = `${spritePos}% 0`;
+ let el = document.getElementById(id);
+ if(el) el.style.backgroundPosition = spritePos + "% 0";
  });
 
  if(state.mode === 'Test') genTest();
@@ -238,7 +252,7 @@
  function toggleLearn() {
  const e = state.words[state.index].e;
  state.learned[e] = !state.learned[e];
- localStorage.setItem('kids_gnomes_v7', JSON.stringify(state.learned));
+ localStorage.setItem('kids_gnomes_v9', JSON.stringify(state.learned));
  update();
  }
 
@@ -275,7 +289,6 @@
  const val = e.target.value.toLowerCase().trim();
  const f = document.getElementById('spellFeedback');
  const h = document.getElementById('gnomeHint');
-
  if(val === cleanE) {
  f.innerText = "ВЕРНО! "; f.style.color = "green";
  speak(); setTimeout(next, 800);
